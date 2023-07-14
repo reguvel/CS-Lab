@@ -1,0 +1,113 @@
+import numpy as np
+import scipy.stats as ss
+def multiply(a, b):
+    if a.shape[1] != b.shape[0]:
+        print("Cannot multiply the matrices!!")
+        return None
+    c = np.zeros([a.shape[0],b.shape[1]], dtype=float)
+    for i in range(len(a)):
+        for j in range(len(b[0])):
+            for k in range(len(b)):
+                c[i, j] += a[i, k] * b [k, j]
+    return c
+def transpose(mat):
+    result = np.zeros((mat.shape[1], mat.shape[0]), dtype=float)
+        
+    for i in range(mat.shape[0]):
+   # iterate through columns
+       for j in range(mat.shape[1]):
+           result[j, i] = mat[i, j]
+    return result
+def recursiveDet(mat):
+    if mat.shape == (2,2):
+        return mat[0,0]*mat[1,1] - mat[0,1]*mat[1,0]
+    total = 0
+    for c in range(mat.shape[0]):
+        matCopy = np.copy(mat)
+        matCopy = matCopy[1:]
+        matCopy = np.delete(matCopy, c, 1)
+        sign = (-1)**(c%2)
+        sub_det = recursiveDet(matCopy)
+        total += sign*mat[0, c]*sub_det
+    return total
+def matInv(mat):
+    det = recursiveDet(mat)
+    adj = np.zeros(mat.shape, dtype=float)
+    for r in range(mat.shape[0]):
+        matC = np.copy(mat)
+        matC = np.delete(matC, r, 0)
+        for c in range(matC.shape[1]):
+            sign = (-1)**((c+1)%2) if r%2==1 else (-1)**(c%2)
+            matC2 = np.delete(matC, c, 1)
+            adj[r, c] = sign * recursiveDet(matC2)
+    adj = adj/det
+    return adj
+def myMean(arr):
+    mean = 0
+    count = 0
+    for i in np.nditer(arr):
+        mean += i
+        count += 1
+    mean /= count
+    return mean
+# y = np.array([[11], [11], [8], [2],[5], [5], [4]])
+# x = np.array([[1, -5, 5], [1, -4, 4], [1, -1, 1], [1, 2, -3], [1, 2, -2], [1, 3, -2], [1, 3, -3]])
+
+p = int(input("Enter number of variables: "))
+n = int(input("Enter number of observations: "))
+x = np.array([[1] for i in range(n)])
+y = np.array([[float(i)] for i in input("Enter values of y: ").split()])
+
+for i in range(p-1):    
+    xvar = np.array([[float(j)] for j in input(f"Enter values of x{i+1}: ").split()])
+    x = np.hstack((x, xvar))
+
+xt = transpose(x)
+xtx = multiply(xt,x)
+xtxi = matInv(xtx)
+xty = multiply(xt, y)
+mlr = multiply(xtxi, xty)
+yFunc = lambda x1, x2: mlr[0]+mlr[1]*x1+mlr[2]*x2
+ycap = yFunc(x[:,1], x[:,2])
+ycap = np.array([[i] for i in ycap])
+Ei = y-ycap
+# Goodness of fit
+print('Goodness of fit by coeffecient of determination:')
+sse = sum(Ei**2)
+sst = sum((y-myMean(y))**2)
+ssr = sst - sse
+
+r2 = ssr/sst
+
+if r2 < 0.9:
+    print("The model is not a good fit")
+else:
+    print("The model is a good fit")
+    
+# ANOVA 
+print('\nANOVA:')
+alpha = 0.05
+n = y.shape[0]
+
+MSSr = ssr/(p - 1)
+MSSe = sse/(n - p)
+
+F = MSSr/MSSe if MSSr/MSSe>0 else MSSe/MSSr
+Ftab = ss.f.ppf(1 - alpha, p-1, n-p)
+
+if F > Ftab:
+    print('We reject H0, i.e., there is atleast one regression parameter which is influencing the model')
+else:
+    print('We accept H0, i.e., there is no regression parameter which is influencing the model')
+
+Output:
+Enter number of variables: 3
+Enter number of observations: 7
+Enter values of y: 11 11 8 2 5 5 4
+Enter values of x1: -5 -4 -1 2 2 3 3
+Enter values of x2: 5 4 1 -3 -2 -2 -3
+Goodness of fit by coeffecient of determination:
+The model is a good fit
+
+ANOVA:
+We reject H0, i.e., there is atleast one regression parameter which is influencing the model

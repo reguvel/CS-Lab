@@ -1,0 +1,185 @@
+### 10. Write a python program to classify the given observations using Linear Discriminant Analysis.
+import numpy as np
+import math
+def multiply(mat1, mat2):
+    a = [mat1.tolist()] if mat1.ndim==1 else mat1.tolist()
+    b = mat2.tolist()
+    if len(a[0]) != len(b):
+        print('Cannot multily the matrices')
+        print(a)
+        print(b)
+        return None
+    c = [[0 for i in range(len(b[0]))] for j in range(len(a))]
+    for i in range(len(a)):
+        for j in range(len(b[0])):
+            for k in range(len(b)):
+                c[i][j] += a[i][k] * b[k][j]
+    c = np.array(c)
+    return c
+def transpose(mat1):
+    if mat1.ndim==1: mat=np.array([mat1.tolist()])
+    else: mat=mat1
+    result = np.zeros((mat.shape[1],mat.shape[0]))
+    for i in range(mat.shape[0]):
+   # iterate through columns
+       for j in range(mat.shape[1]):
+           result[j, i] = mat[i, j]
+    return result
+def recursiveDet(mat):
+    if mat.shape == (1,1):
+        return mat[0]
+    elif mat.shape == (2,2):
+        return mat[0,0]*mat[1,1] - mat[0,1]*mat[1,0]
+    total = 0
+    for c in range(mat.shape[0]):
+        matCopy = np.copy(mat)
+        matCopy = matCopy[1:]
+        matCopy = np.delete(matCopy, c, 1)
+        sign = (-1)**(c%2)
+        sub_det = recursiveDet(matCopy)
+        total += sign*mat[0, c]*sub_det
+    return total
+def myInv(mat):
+    det = recursiveDet(mat)
+    adj = np.zeros(mat.shape, dtype=float)
+    for r in range(mat.shape[0]):
+        matC = np.copy(mat)
+        matC = np.delete(matC, r, 0)
+        for c in range(matC.shape[1]):
+            matC2 = np.delete(matC, c, 1)
+            adj[r, c] = ((-1)**((r+c)%2)) * recursiveDet(matC2)
+    adj = adj/det
+    return adj
+def discriminant(mewi, cinv, obsv, prop):
+    v1 = multiply(multiply(mewi, cinv), obsv)
+    v2 = 0.5*multiply(multiply(mewi, cinv), transpose(mewi))
+    v3 = math.log(prop)
+    f = v1[0,0] - v2[0,0] + v3
+    return f
+p = int(input("Enter the number of variables: "))
+g = int(input("Enter the number of classes: "))
+n = int(input("Enter the number of observations: "))
+props = np.array([float(i) for i in input("Enter the proportions of the classes: ").split()])
+# p, g, n = 2, 3, 9
+# props = np.array([0.25, 0.25, 0.5])
+
+mewx = np.zeros((1,p), dtype=float)
+mewi = np.zeros((g,p), dtype=float)
+x = np.empty((0,p), dtype=float)
+
+for i in range(g):
+    ni = int(input(f"Enter number of observations in class{i+1}: "))
+    for j in range(ni):
+        xvar = np.array([float(k) for k in input("Enter the observations: ").split()])
+        mewx += xvar
+        mewi[i] += xvar
+        x = np.vstack((x, xvar))
+    mewi[i] /= ni
+mewx /= n
+
+obsv = np.array([[float(i)] for i in input("Enter the observations to classify: ").split()])
+
+xmew = (x-mewx)
+
+c = multiply(transpose(xmew), xmew)
+c /= n
+cinv = myInv(c)
+
+f = np.zeros((g,), dtype=float)
+for i in range(g):
+    f[i] += discriminant(mewi[i], cinv, obsv, props[i])
+
+ele, pos = np.max(f), np.argmax(f)+1
+print(f'f{pos} ({round(f[pos-1], 4)}) is the highest value, hence the observation belongs to class{pos}')
+
+Enter the level of significance: 0.05
+Enter the number of treatments: 3
+Enter the values of treatments: 
+Treatment 1: 13 10 8 11 8
+Treatment 2: 13 11 14 14
+Treatment 3: 4 1 3 4 2 4
+Fcal>Ftable (50.625>3.8853) We reject H0 and accept H1, i.e., there is no homogenity among the means
+Enter the level of significance: 0.05
+Enter the number of treatments: 4
+Enter the number of blocks: 5
+Enter the values of treatments: 
+Treatment 1: 75 73 59 69 84
+Treatment 2: 83 72 56 70 92
+Treatment 3: 86 61 53 72 88
+Treatment 4: 73 67 62 79 95
+Inference related to treatments: 
+Ftr < Ftab (1.9749708963913033 < 3.4903), we accept H0, i.e.,there is no significant different among the treatments
+Inference related to blocks
+Fb >= Ftab (20.57206012378406 >= 3.2592), we reject H0 and accept H1,i.e.,there is significant different among the blocks
+Enter number of variables: 3
+Enter number of observations: 7
+Enter values of y: 11 11 8 2 5 5 4
+Enter values of x1: -5 -4 -1 2 2 3 3
+Enter values of x2: 5 4 1 -3 -2 -2 -3
+Goodness of fit by coeffecient of determination:
+The model is a good fit
+
+ANOVA:
+We reject H0, i.e., there is atleast one regression parameter which is influencing the model
+Enter the number of y variables: 2
+Enter the number of x variables: 3
+Enter the number of observations: 12
+Enter values of y1: 10 12 11 9 9 10 11 12 11 10 11 12
+Enter values of y2: 100 110 105 94 95 99 104 108 105 98 103 110
+Enter values of x1: 9 8 7 14 12 10 7 4 6 5 7 6
+Enter values of x2: 62 58 64 60 63 57 55 56 59 61 57 60
+Enter values of x3: 1.0 1.3 1.2 0.8 0.8 0.9 1.0 1.2 1.1 1.0 1.2 1.2
+[[ 10.89699524  91.09719893]
+ [  0.04494029   0.06400723]
+ [ -0.08770359  -0.29437367]
+ [ -5.03545972 -27.83530349]]
+Fitting for profit: y = 10.897 + 0.045x1 + -0.088x2 + -5.035x3
+Fitting for sales: y = 91.097 + 0.064x1 + -0.294x2 + -27.835x3
+Enter total number of groups: 8
+Enter number of treatments: 3
+Enter the number of observations in each group: 2
+Enter number of groups in treatment1: 3
+	Enter the values of group1: 9 3
+	Enter the values of group2: 6 2
+	Enter the values of group3: 9 7
+Enter number of groups in treatment2: 2
+	Enter the values of group1: 0 4
+	Enter the values of group2: 2 0
+Enter number of groups in treatment3: 3
+	Enter the values of group1: 3 8
+	Enter the values of group2: 1 9
+	Enter the values of group3: 2 7
+
+For y1: 
+	SST = 88.0
+	SSE = 10.0
+	SSR = 78.0
+
+For y2: 
+	SST = 72.0
+	SSE = 24.0
+	SSR = 48.0
+...
+	SSE = 1.0
+	SSR = -12.0
+Inference: 
+Fcal > Ftab (8.2 > 3.84), we reject H0, hence we conclude that there is no homogenity among the treatments
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...
+Enter the number of variables: 2
+Enter the number of classes: 3
+Enter the number of observations: 9
+Enter the proportions of the classes: 0.25 0.25 0.5
+Enter number of observations in class1: 3
+Enter the observations: -2 5
+Enter the observations: 0 3
+Enter the observations: -1 1
+Enter number of observations in class2: 3
+Enter the observations: 0 6
+Enter the observations: 2 4
+Enter the observations: 1 2
+Enter number of observations in class3: 3
+Enter the observations: 1 -2
+Enter the observations: 0 0
+Enter the observations: -1 -4
+Enter the observations to classify: -2 -1
+f3 (-0.7281) is the highest value, hence the observation belongs to class3

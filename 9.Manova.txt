@@ -1,0 +1,130 @@
+### 9. Write a python program to classify the treatments based on MANOVA.
+import numpy as np
+import scipy.stats as ss
+def det(mat):
+    return mat[0,0]*mat[1,1]-mat[0,1]*mat[1,0]
+n = int(input("Enter total number of groups: "))
+k = int(input("Enter number of treatments: "))
+p = int(input("Enter the number of observations in each group: "))
+
+trs = []
+yi = np.array([[0,0] for i in range(k)])
+ydbar = np.array([0, 0])
+for i in range(k):
+    ni = int(input(f"Enter number of groups in treatment{i+1}: "))
+    trV = np.empty((0, p))
+    for j in range(ni):
+        grp = np.array([float(k) for k in input(f"\tEnter the values of group{j+1}: ").split()])
+        trV = np.append(trV, np.array([grp]), axis=0)
+        yi[i] = yi[i]+grp
+        ydbar = ydbar + grp
+    yi[i] = yi[i]/ni
+    trs.append(trV)
+trs = np.array(trs, dtype=object)
+ydbar = ydbar/n
+
+# for y1
+sst1, sse1, sst2, sse2, sst12, sse12 = 0, 0, 0, 0, 0, 0
+for i in range(len(trs)):
+    for j in trs[i]:
+        sst1 += (j[0]-ydbar[0])**2
+        sse1 += (j[0]-yi[i, 0])**2
+        sst2 += (j[1]-ydbar[1])**2
+        sse2 += (j[1]-yi[i, 1])**2
+        sst12 += j[0]*j[1] - ydbar[0]*ydbar[1]
+        sse12 += j[0]*j[1] - yi[i, 0]*yi[i, 1]
+ssr1 = sst1 - sse1
+ssr2 = sst2 - sse2
+ssr12 = sst12 - sse12
+
+print('\nFor y1: ')
+print(f'\tSST = {sst1}\n\tSSE = {sse1}\n\tSSR = {ssr1}')
+print('\nFor y2: ')
+print(f'\tSST = {sst2}\n\tSSE = {sse2}\n\tSSR = {ssr2}')
+print('\nFor cross product of y1 & y2: ')
+print(f'\tSST = {sst12}\n\tSSE = {sse12}\n\tSSR = {ssr12}')
+
+W = np.array([[sse1, sse12], [sse12, sse2]])
+T = np.array([[sst1, sst12], [sst12, sst2]])
+lambdaS = det(W)/det(T)
+F = ((n-k-1)/(k-1))*(1-lambdaS**0.5)/(lambdaS)**0.5
+Ftab = ss.f.ppf(1-alpha, p*(k-1), p*(n-k-1))
+
+print('Inference: ')
+if F > Ftab:
+    print(f'Fcal > Ftab ({round(F, 2)} > {round(Ftab, 2)}), we reject H0, hence we conclude that there is no homogenity among the treatments')
+else:
+    print(f'Fcal <= Ftab ({round(F, 2)} <= {round(Ftab, 2)}), we accept H0, hence we conclude that there is homogenity among the treatments')
+Enter the level of significance: 0.05
+Enter the number of treatments: 3
+Enter the values of treatments: 
+Treatment 1: 13 10 8 11 8
+Treatment 2: 13 11 14 14
+Treatment 3: 4 1 3 4 2 4
+Fcal>Ftable (50.625>3.8853) We reject H0 and accept H1, i.e., there is no homogenity among the means
+Enter the level of significance: 0.05
+Enter the number of treatments: 4
+Enter the number of blocks: 5
+Enter the values of treatments: 
+Treatment 1: 75 73 59 69 84
+Treatment 2: 83 72 56 70 92
+Treatment 3: 86 61 53 72 88
+Treatment 4: 73 67 62 79 95
+Inference related to treatments: 
+Ftr < Ftab (1.9749708963913033 < 3.4903), we accept H0, i.e.,there is no significant different among the treatments
+Inference related to blocks
+Fb >= Ftab (20.57206012378406 >= 3.2592), we reject H0 and accept H1,i.e.,there is significant different among the blocks
+Enter number of variables: 3
+Enter number of observations: 7
+Enter values of y: 11 11 8 2 5 5 4
+Enter values of x1: -5 -4 -1 2 2 3 3
+Enter values of x2: 5 4 1 -3 -2 -2 -3
+Goodness of fit by coeffecient of determination:
+The model is a good fit
+
+ANOVA:
+We reject H0, i.e., there is atleast one regression parameter which is influencing the model
+Enter the number of y variables: 2
+Enter the number of x variables: 3
+Enter the number of observations: 12
+Enter values of y1: 10 12 11 9 9 10 11 12 11 10 11 12
+Enter values of y2: 100 110 105 94 95 99 104 108 105 98 103 110
+Enter values of x1: 9 8 7 14 12 10 7 4 6 5 7 6
+Enter values of x2: 62 58 64 60 63 57 55 56 59 61 57 60
+Enter values of x3: 1.0 1.3 1.2 0.8 0.8 0.9 1.0 1.2 1.1 1.0 1.2 1.2
+[[ 10.89699524  91.09719893]
+ [  0.04494029   0.06400723]
+ [ -0.08770359  -0.29437367]
+ [ -5.03545972 -27.83530349]]
+Fitting for profit: y = 10.897 + 0.045x1 + -0.088x2 + -5.035x3
+Fitting for sales: y = 91.097 + 0.064x1 + -0.294x2 + -27.835x3
+Enter total number of groups: 8
+Enter number of treatments: 3
+Enter the number of observations in each group: 2
+Enter number of groups in treatment1: 3
+	Enter the values of group1: 9 3
+	Enter the values of group2: 6 2
+	Enter the values of group3: 9 7
+Enter number of groups in treatment2: 2
+	Enter the values of group1: 0 4
+	Enter the values of group2: 2 0
+Enter number of groups in treatment3: 3
+	Enter the values of group1: 3 8
+	Enter the values of group2: 1 9
+	Enter the values of group3: 2 7
+
+For y1: 
+	SST = 88.0
+	SSE = 10.0
+	SSR = 78.0
+
+For y2: 
+	SST = 72.0
+	SSE = 24.0
+	SSR = 48.0
+...
+	SSE = 1.0
+	SSR = -12.0
+Inference: 
+Fcal > Ftab (8.2 > 3.84), we reject H0, hence we conclude that there is no homogenity among the treatments
+Output is truncated. View as a scrollable element or open in a text editor. Adjust cell output settings...

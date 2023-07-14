@@ -1,0 +1,252 @@
+1. Write a python program to find the best fit straight line and draw the scatter plot
+import numpy as np
+import matplotlib.pyplot as plt
+def myMean(data):
+    mean = 0
+    for i in np.nditer(data):
+        mean += i
+    mean /= len(data)
+    return mean
+x = np.array([float(i) for i in input("Enter x values: ").split()])
+y = np.array([float(i) for i in input("Enter y values: ").split()])
+
+x2 = x * x
+xy = x * y
+
+m = (len(x)*sum(xy) - sum(x)*sum(y)) / (len(x)*sum(x2) - (sum(x))**2)
+
+c = (sum(y) - m*sum(x)) / len(x)
+
+line = lambda k : (m*k + c)
+ycal = line(x)
+
+plt.plot(x,y)
+plt.plot(x,ycal)
+
+ybar = myMean(y)
+
+sse = sum((y-ycal)**2)
+ssr = sum((ycal-ybar)**2)
+sst = ssr + sse
+
+r2 = ssr/sst
+
+if r2 > 0.9:
+    print(f'The calculated straight line y={round(c,4)}+{round(m,4)}x is the best fit to the given data')
+else:
+    print(f'The calculated straight line y={round(c,4)}+{round(m,4)}x is not the best fit to the given data')
+
+2. Write a python program to fit a second degree parabola of the form y=a+bx+cx^2 and draw the scatter plot.
+import matplotlib.pyplot as plt
+import numpy as np
+def myMean(data):
+    mean = 0
+    for i in np.nditer(data):
+        mean += i
+    mean /= len(data)
+    return mean
+x = np.array([float(i) for i in input("Enter x values: ").split()])
+y = np.array([float(i) for i in input("Enter y values: ").split()])  
+x2, x3, x4, xy, x2y, n= x*2, x3, x4, x*y, (x*2)*y,len(x)
+ybar = myMean(y)
+def det(a):
+  return (a[0][0] * (a[1][1] * a[2][2] - a[2][1] * a[1][2])
+    -a[1][0] * (a[0][1] * a[2][2] - a[2][1] * a[0][2])
+    +a[2][0] * (a[0][1] * a[1][2] - a[1][1] * a[0][2]))
+d=[sum(y),sum(xy),sum(x2y)]
+delta=[[n,sum(x),sum(x2)],[sum(x),sum(x2),sum(x3)],[sum(x2),sum(x3),sum(x4)]]
+delt=[0,0,0]
+for i in range(3):
+    deltc=delta.copy()
+    deltc[i]=d
+    delt[i]=det(deltc)/det(delta)
+a,b,c=delt 
+ycal = a+b*x+c*(x**2)
+
+sse = sum((y-ycal)**2)
+ssr = sum((ycal-ybar)**2)
+sst = ssr + sse
+
+r2 = ssr/sst
+
+plt.plot(x, y)
+plt.plot(x, ycal)
+
+if r2>0.9:
+    print(f'The calculated parabola y={round(a,4)}+{round(b,4)}x+{round(c,4)}x^2 is the best fit to the given data')
+else:
+    print(f'The calculated parabola y={round(a,4)}+{round(b,4)}x+{round(c,4)}x^2 is not the best fit to the given data')
+
+3. Write a python program to find Karl Pearson’s correlation coefficient.
+def mySd(x):
+    x2, xbar2 = x*x, myMean(x)**2
+    val = ((1/len(x))*sum(x2-xbar2))**(0.5)
+    return val
+x = np.array([float(i) for i in input("Enter x values: ").split()])
+y = np.array([float(i) for i in input("Enter y values: ").split()])
+
+x2, y2, xy, xbar, ybar = x*x, y*y, x*y, myMean(x), myMean(y)
+sdx = mySd(x)
+sdy = mySd(y)
+
+cov = (1/len(x)*sum(xy))-(xbar*ybar)
+r = cov/(sdx*sdy)
+print(f"The Pearson's correlation coeffecient is: {round(r,4)}")
+
+4. Write a python program to find the Spearman’s correlation coefficient between x and y variables.
+import numpy as np
+def rank(x,z):
+    rx = []
+    i = 0
+    cf = 0
+    r = []
+    while(i!=len(x)):
+            y = x.count(x[i])
+            if(y>1 and x[i] not in r):
+                r.append(x[i])
+                cf = cf + y*(y**2-1)/12
+            avg = z.index(x[i])+1+(y-1)/2
+            rx.append(avg)
+            i = i+1
+    return (np.array(rx),cf)
+x = [float(i) for i in input("Enter the values of x : ").split(" ")]
+y = [float(i) for i in input("Enter the values of y : ").split(" ")]
+n = np.size(x)
+rx,cf1 = rank(x,sorted(x,reverse = True))
+ry,cf2 = rank(y,sorted(y,reverse = True))
+cf = cf1+cf2
+di2 = (rx-ry)**2
+sumdi2 = np.sum(di2)
+row = 1-(6*(sumdi2+cf)/(n*(n**2-1)))
+print("The Spearman's Rank Correlation Coefficient is ",row)
+
+5. Write a python program to classify the data based on one way ANOVA
+import scipy.stats as ss
+alpha = float(input("Enter the level of significance: "))
+
+k = int(input("Enter the number of treatments: "))
+
+# tr = [[13, 10, 8, 11, 8], [13, 11, 14, 14], [4, 1, 3, 4, 2, 4]]
+tr = []
+
+print("Enter the values of treatments: ")
+for i in range(k):
+    vals = [float(j) for j in input(f"Treatment {i+1}: ").split()]
+    tr.append(vals)
+   
+G = 0
+N = 0
+RSS = 0
+sigTi2N = 0
+
+for i in range(k):
+    ti2 = 0
+    ni = 0
+    for j in tr[i]:
+        N += 1
+        ni += 1
+        RSS += j**2
+        G += j
+        ti2 += j
+    sigTi2N += (ti2**2)/ni
+
+CF = G**2/N
+SST = RSS - CF
+SStr = sigTi2N - CF
+SSe = SST - SStr
+
+MSStr = SStr/(k-1)
+MSSe = SSe/(N-k)
+
+Fcal = MSStr/MSSe
+
+if Fcal < 1: Fcal = MSSe/MSStr
+
+FTable = ss.f.ppf(1-alpha, k-1, N-k)
+
+if Fcal > FTable:
+    print(f"Fcal>Ftable ({Fcal}>{round(FTable,4)}) We reject H0 and accept H1, i.e., there is no homogenity among the means")
+else:
+    print(f"Fcal<=Ftable ({Fcal}<={round(FTable,4)}) )}) We accept H0 and reject H1, i.e., there is homogenity among the means")
+
+6. Write a python program to classify the data based on two way Anova.
+import scipy.stats as ss
+alpha = float(input("Enter the level of significance: "))
+
+k = int(input("Enter the number of treatments: "))
+h = int(input("Enter the number of blocks: "))
+
+# tr = np.array([[75, 73 ,59,69, 84], [83, 72, 56, 70, 92], [86, 61, 53, 72, 88],[73, 67, 62, 79, 95]])
+tr = []
+print("Enter the values of treatments: ")
+for i in range(k):
+    vals = [float(j) for j in input(f"Treatment {i+1}: ").split()]
+    tr.append(vals)
+tr = np.array(tr)
+N, RSS = 0, 0
+Ti = [0 for i in range(k)]
+Bj = [0 for i in range(h)]
+
+for i in range(k):
+    for j in range(h):
+        N += 1
+        RSS += tr[i,j]**2
+        Ti[i] += tr[i,j]
+        Bj[j] += tr[i,j]
+
+G = sum(Ti)
+Ti2 = sum([i**2 for i in Ti])
+Bj2 = sum([i**2 for i in Bj])
+
+CF = G**2/N
+SST = RSS - CF
+SStr = (1/h)*Ti2 - CF
+SSb = (1/k)*Bj2 - CF
+SSe = SST - SStr - SSb
+
+MSStr = SStr/(k-1)
+MSSb = SSb/(h-1)
+MSSe = SSe/((k-1)*(h-1))
+
+Ftr = MSStr/MSSe if MSStr/MSSe>1 else MSSe/MSStr
+Fb = MSSb/MSSe if MSSb/MSSe>1 else MSSe/MSSb
+
+FtrTab = ss.f.ppf(1-alpha, k-1, (k-1)*(h-1))
+FbTab = ss.f.ppf(1-alpha, h-1, (k-1)*(h-1))
+
+print("Inference related to treatments: ")
+if Ftr >= FtrTab:
+    print(f"Ftr >= Ftab ({Ftr} >= {round(FtrTab,4)}), we reject H0 and accept H1,i.e.,there is significant different among the treatments")
+else:
+    print(f"Ftr < Ftab ({Ftr} < {round(FtrTab,4)}), we accept H0, i.e.,there is no significant different among the treatments")
+
+print("Inference related to blocks")
+if Fb >= FbTab:
+    print(f"Fb >= Ftab ({Fb} >= {round(FbTab,4)}), we reject H0 and accept H1,i.e.,there is significant different among the blocks")
+else:
+    print(f"Fb < Ftab ({Fb} < {round(FbTab,4)}), we accept H0, i.e.,there is no significant different among the blocks")
+
+Regression Lines
+import matplotlib.pyplot as plt
+import numpy as np
+n=int(input("Enter the no. of elements:"))
+x=np.array([float(input("Enter x["+str(i)+"]:"))for i in range(n)])
+y=np.array([float(input("Enter y["+str(i)+"]:"))for i in range(n)])
+x2=np.power(x,2)
+y2=np.power(y,2)
+xy=np.multiply(x,y)
+sumx2=np.sum(x2)
+sumy2=np.sum(y2)
+sumxy=np.sum(xy)
+xbar=np.mean(x)
+ybar=np.mean(y)
+cov=(sumxy/n)-(xbar*ybar)
+sx=np.sqrt((sumx2/n)-(xbar*xbar))
+sy=np.sqrt((sumy2/n)-(ybar*ybar))
+r=cov/(sx*sy)
+bxy=(r)*(sx/sy)
+byx=(r)*(sy/sx)
+
+print("The Regression line x on y: x=("+str(np.round(bxy,decimals=4))+")*y+("+str(np.round(xbar-bxy*ybar,decimals=4))+")")
+print("The Regression line y on x: y=("+str(np.round(byx,decimals=4))+")*x+("+str(np.round(ybar-byx*xbar,decimals=4))+")")
+

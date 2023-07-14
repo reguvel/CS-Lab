@@ -1,0 +1,700 @@
+1)
+#straight Line
+
+import numpy as np
+import matplotlib.pyplot as plt
+x=np.array(eval(input("enter sample1")))
+y=np.array(eval(input("enter sample2")))
+n=len(x)
+b=((n*sum(x*y))-(sum(x)*sum(y)))/((n*sum(x*x))-(sum(x)**2))
+a=(sum(y)-(b*sum(x)))/n
+print("y=",a,"+",b,"x")
+y1=a+b*x
+print(y1)
+plt.plot(x,y1)
+plt.title("straight line")
+plt.scatter(x,y1,c="red")
+plt.show()
+
+input:
+[1,2,3,4,6,8]
+[2.4,3,3.6,4,5,6]
+
+--------------------------------------------------------------------------------------------------------
+2)
+#parabola
+
+import numpy as np
+import matplotlib.pyplot as plt
+def deter(m):
+    det=(m[0][0]*((m[1][1]*m[2][2])-(m[1][2]*m[2][1])))-(m[0][1]*((m[1][0]*m[2][2])-(m[1][2]*m[2][0])))+(m[0][2]*((m[1][0]*m[2][1])-(m[1][1]*m[2][0])))
+    return(det)
+
+x=np.array(eval(input("enter sample1")))
+y=np.array(eval(input("enter sample2")))
+n=len(x)
+d=np.array([[n,sum(x),sum(x*x)],[sum(x),sum(x*x),sum(x*x*x)],[sum(x*x),sum(x*x*x),sum(x*x*x*x)]])
+d1=np.array([[sum(y),sum(x*y),sum(x*x*y)],[sum(x),sum(x*x),sum(x*x*x)],[sum(x*x),sum(x*x*x),sum(x*x*x*x)]])
+d2=np.array([[n,sum(x),sum(x*x)],[sum(y),sum(x*y),sum(x*x*y)],[sum(x*x),sum(x*x*x),sum(x*x*x*x)]])
+d3=np.array([[n,sum(x),sum(x*x)],[sum(x),sum(x*x),sum(x*x*x)],[sum(y),sum(x*y),sum(x*x*y)]])
+a=deter(d1)/deter(d)
+b=deter(d2)/deter(d)
+c=deter(d3)/deter(d)
+print("y=",a,"+",b,"x","+",c,"x^2")
+y1=a+b*x+c*x*x
+plt.plot(x,y1)
+plt.title("parabola")
+plt.scatter(x,y1,c="red")
+plt.show()
+
+input :
+[0,1,2,3,4]
+[1,1.8,1.3,2.5,6.3]
+--------------------------------------------------------------------------------------------------------
+
+3)
+
+# correlation coefficient
+
+
+import numpy as np
+x = np.array([float(i) for i in input("Enter the values of x : ").split()])
+y = np.array([float(i) for i in input("Enter the values of y : ").split()])
+sumxy = np.sum(x*y)
+sumy = np.sum(y)
+sumx = np.sum(x)
+sumx2 = np.sum(x**2)
+sumy2 = np.sum(y**2)
+n = np.size(x)
+meanx = sumx/n
+meany = sumy/n
+sigmax = (np.sum((sumx2/n)-(meanx)**2))**0.5
+sigmay = (np.sum((sumy2/n)-(meany)**2))**0.5
+covxy = sumxy/n-meanx*meany
+r = covxy/(sigmax*sigmay)
+print("The correlation coefficient of given values is :",r)
+--------------------------------------------------------------------------------------------------------
+4)
+
+# rank correlation coefficient
+
+
+import numpy as np
+def rank(x,z):
+    rx = []
+    i = 0
+    cf = 0
+    r = []
+    while(i!=len(x)):
+            y = x.count(x[i])
+            if(y>1 and x[i] not in r):
+                r.append(x[i])
+                cf = cf + y*(y**2-1)/12
+            avg = z.index(x[i])+1+(y-1)/2
+            rx.append(avg)
+            i = i+1
+    return (np.array(rx),cf)
+x = [float(i) for i in input("Enter the values of x : ").split()]
+y = [float(i) for i in input("Enter the values of y : ").split()]
+n = np.size(x)
+rx,cf1 = rank(x,sorted(x,reverse = True))
+ry,cf2 = rank(y,sorted(y,reverse = True))
+cf = cf1+cf2
+di2 = (rx-ry)**2
+sumdi2 = np.sum(di2)
+row = 1-(6*(sumdi2+cf)/(n*(n**2-1)))
+print("The spearman's correlation coefficient is ",row)
+
+--------------------------------------------------------------------------------------------------------
+5)
+
+#ANOVA ONE WAY
+
+
+import numpy as np
+import scipy.stats as s
+t1= np.array([float(i) for i in input("Enter the values of x : ").split()])
+t2= np.array([float(i) for i in input("Enter the values of x : ").split()])
+t3 = np.array([float(i) for i in input("Enter the values of x : ").split()])
+G=np.sum(t1)+np.sum(t2)+np.sum(t3)
+print(G)
+sigmaTi2=(np.sum(t1)**2)/np.size(t1)+(np.sum(t2)**2)/np.size(t2)+(np.sum(t3)**2)/np.size(t3)
+print(sigmaTi2)
+cf=(G**2)/(np.size(t1)+np.size(t2)+np.size(t3))
+print(cf)
+T=sigmaTi2-cf
+print("Treatments sum of squares",T)
+t1sq=np.square(t1)
+t2sq=np.square(t2)
+t3sq=np.square(t3)
+TSS=(np.sum(t1sq)+np.sum(t2sq)+np.sum(t3sq))-cf
+print("Total sum of squares",TSS)
+ESS=TSS-T
+print("Error sum of the squares:",ESS)
+dfTr=2
+dfT=(np.size(t1)+np.size(t2)+np.size(t3))-1
+dfE=dfT-dfTr
+MSST=T/dfTr
+MSSE=ESS/dfE
+Fcal=MSST/MSSE
+print("F calculated value:",Fcal)
+Ftable=s.f.ppf(1-0.05,dfTr,dfE)
+print("F table value:",Ftable)
+if(Fcal<Ftable):
+    print("There is a homogenity between the treatments")
+else:
+    print("There is no homogenity between the treatments")
+
+
+
+
+--------------------------------------------------------------------------------------------------------
+6)
+
+# TWO WAY ANOVA
+
+import numpy as np
+import scipy.stats as s
+A=np.array([[13,7,9,3],[6,6,3,1],[11,5,15,5]])
+T1=np.sum(A[0])
+T2=np.sum(A[1])
+T3=np.sum(A[2])
+T1sqb=(T1**2)/np.size(A[0])
+T2sqb=(T2**2)/np.size(A[1])
+T3sqb=(T3**2)/np.size(A[2])
+G=np.sum(T1)+np.sum(T2)+np.sum(T3)
+print(G)
+cf=(G**2)/np.size(A)
+print(cf)
+Trssq=(np.sum(T1sqb)+np.sum(T2sqb)+np.sum(T3sqb))-cf
+print("Treatment sum of squares",Trssq)
+B1=np.sum(A[0][0])+np.sum(A[1][0])+np.sum(A[2][0])
+B2=np.sum(A[0][1])+np.sum(A[1][1])+np.sum(A[2][1])
+B3=np.sum(A[0][2])+np.sum(A[1][2])+np.sum(A[2][2])
+B4=np.sum(A[0][3])+np.sum(A[1][3])+np.sum(A[2][3])
+B1sq=(B1**2)/(A.shape[0])
+B2sq=(B2**2)/(A.shape[0])
+B3sq=(B3**2)/(A.shape[0])
+B4sq=(B4**2)/(A.shape[0])
+Bssq=(np.sum(B1sq)+np.sum(B2sq)+np.sum(B3sq)+np.sum(B4sq))-cf
+print("Block sum of squares",Bssq)
+sum=0
+for i in range(0,3):
+    for j in range(0,4):
+        sum=sum+np.square(A[i][j])
+TSS=sum-cf
+print("Total sum of squares",TSS)
+ESS=TSS-Trssq-Bssq
+print("Error sum of squares",ESS)
+Todf=np.size(A)-1
+Trdf=(A.shape[0])-1
+Bdf=(A.shape[1])-1
+Edf=Todf-Trdf-Bdf
+MSST=Trssq/(Trdf)
+print("Mean sum of squares due to treatments",MSST)
+MSSB=Bssq/(Bdf)
+print("Block sum of square",MSSB)
+MSSE=ESS/Edf
+print("Error sum of squares",MSSE)
+if(MSST>MSSE):
+    FcalT=MSST/MSSE
+else:
+    FcalT=MSSE/MSST
+print("F calculated value due to treatments",FcalT)
+if(MSSB>MSSE):
+    FcalB=MSSB/MSSE
+else:
+    FcalB=MSSE/MSSB
+print("F calculated value due to blocks",FcalB)
+FtabT=s.f.ppf(1-0.05,2,6)
+print("F table value due to treatments",FtabT)
+FtabB=s.f.ppf(1-0.05,3,6)
+print("F table value due to blocks",FtabB)
+print("Inference due to treatments")
+if(FcalT<FtabT):
+    print("The effect of treatments are equal")
+else:
+    print("The effet of treatments are not equal")
+if(FcalB<FtabB):
+    print("The effect of blocks are equal")
+else:
+    print("The effet of blocks are not equal")
+
+
+--------------------------------------------------------------------------------------------------------
+7)
+
+import numpy as np
+import pandas as pd
+import scipy.stats
+
+def matmul(arr1,arr2):
+    x=np.shape(arr1)
+    y=np.shape(arr2)
+    if(x[1]==y[0]):
+        arr3=np.zeros((x[0],y[1]),float)
+        for i in range(0,x[0]):
+            for j in range(0,y[1]):
+                for k in range(0,y[0]):
+                    arr3[i][j]=arr3[i][j]+arr1[i][k]*arr2[k][j]
+    return(arr3)
+
+
+def transpose(mat):
+    x=np.shape(mat)
+    arr1=np.zeros((x[1],x[0]),int)
+    for i in range(0,x[1]):
+        for j in range(0,x[0]):
+            arr1[i][j]=mat[j][i]
+    return arr1
+
+
+def cofactor(mat):
+    x=np.shape(mat)
+    arr=np.zeros((x[1],x[0]),float)
+    if(len(mat)==2):
+        arr[0,0]=mat[1,1]
+        arr[1,1]=mat[0,0]
+        arr[0,1]=-1*mat[0,1]
+        arr[1,0]=-1*mat[1,0]
+    else:
+        arr[0][0]=(mat[1][1]*mat[2][2])-(mat[2][1]*mat[1][2])
+        arr[0][1]=-1*((mat[1][0]*mat[2][2])-(mat[2][0]*mat[1][2]))
+        arr[0][2]=(mat[1][0]*mat[2][1])-(mat[2][0]*mat[1][1])
+        arr[1][0]=-1*((mat[0][1]*mat[2][2])-(mat[2][1]*mat[0][2]))
+        arr[1][1]=(mat[0][0]*mat[2][2])-(mat[2][0]*mat[0][2])
+        arr[1][2]=-1*((mat[0][0]*mat[2][1])-(mat[2][0]*mat[0][1]))
+        arr[2][0]=(mat[0][1]*mat[1][2])-(mat[1][1]*mat[0][2])
+        arr[2][1]=-1*((mat[0][0]*mat[1][2])-(mat[1][0]*mat[0][2]))
+        arr[2][2]=(mat[0][0]*mat[1][1])-(mat[1][0]*mat[0][1])
+    return arr
+
+def deter(m): 
+    if(len(m)==2):
+        det=(m[0][0]*m[1][1])-(m[1][0]*m[0][1])
+    else:
+        det=(m[0][0]*((m[1][1]*m[2][2])-(m[1][2]*m[2][1])))-(m[0][1]*((m[1][0]*m[2][2])-(m[1][2]*m[2][0])))+(m[0][2]*((m[1][0]*m[2][1])-(m[1][1]*m[2][0])))
+    return(det)
+
+def mean(x):
+    add=0
+    for i in range(0,len(x)):
+        add=add+x[i][0]
+    m=add/len(x)
+    return m
+
+
+alpha=float(input("enter the value of alpha"))
+y=eval(input("enter dependent variable values"))
+x=eval(input("enter independent variable values"))
+x_trans=transpose(x)
+x_tx=matmul(x_trans,x)
+cofact=cofactor(x_tx)
+adjacent=transpose(cofact)
+inverse=adjacent/deter(x_tx)
+x_ty=matmul(x_trans,y)
+beta=matmul(inverse,x_ty)
+print("The parameters are:",beta)
+fitted=np.zeros((len(y)),float)
+error=np.zeros((len(y)),float)
+t=np.zeros((len(y)),float)
+tot_err=0
+tot=0
+for i in range(0,len(y)):
+    fitted[i]=beta[0]+beta[1]*x[i][1]+beta[2]*x[i][2]
+    error[i]=(y[i][0]-fitted[i])**2
+    t[i]=(y[i][0]-mean(y))**2
+ESS=sum(error)
+TSS=sum(t)
+RSS=TSS-ESS
+R2=RSS/TSS
+R1=RSS/(len(x[0])-1)
+E1=ESS/(len(x)-len(x[0]))
+fcal=R1/E1
+print("The coefficient of determination is:",R2)
+if(R2>0.90):
+    print("The model is good fit")
+else:
+    print("The model isnot good fit")
+ftab=scipy.stats.f.ppf(1-alpha,len(x[0])-1,len(x)-len(x[0]))
+data1=[["Regression",len(x[0])-1,RSS,R1,fcal,ftab],["Error",len(x)-len(x[0]),ESS,E1," "," "],["Total",len(x)-1,TSS," "," "," "]]
+print(pd.DataFrame(data1,columns=["Source of variation","Degree of freedom","Sum of squares","Mean sum of squares","Fcal","Ftab"]))
+if(fcal<=ftab):
+    print("The model is good fit")
+else:
+    print("The model isnot good fit")
+SE=np.zeros((len(beta)),float)
+fcal=np.zeros((len(beta)),float)
+for i in range(0,len(beta)):
+    SE[i]=(E1*inverse[i][i])**0.5
+    fcal[i]=beta[i]/SE[i]
+data2=[["constant",beta[0],SE[0],fcal[0]],["beta1",beta[1],SE[1],fcal[1]],["beta2",beta[2],SE[2],fcal[2]]]
+print(pd.DataFrame(data2,columns=["Predicator","Coefficient","SE","t"]))
+ttab=scipy.stats.t.ppf(q=1-.05/2,df=len(x)-len(x[0]))
+print(ttab)
+for i in range(len(beta)):
+    if(abs(fcal[i])>ttab):
+        print("beta",i," is contributing to the model")
+    else:
+        print("beta",i," is not contributing to the model")
+    
+
+
+--------------------------------------------------------------------------------------------------------
+8)
+
+import numpy as np
+import pandas as pd
+import scipy.stats
+
+def matmul(arr1,arr2):
+    x=np.shape(arr1)
+    y=np.shape(arr2)
+    if(x[1]==y[0]):
+        arr3=np.zeros((x[0],y[1]),float)
+        for i in range(0,x[0]):
+            for j in range(0,y[1]):
+                for k in range(0,y[0]):
+                    arr3[i][j]=arr3[i][j]+(arr1[i][k]*arr2[k][j])
+    return(arr3)
+
+def transpose(mat):
+    x=np.shape(mat)
+    arr1=np.zeros((x[1],x[0]),float)
+    for i in range(0,x[1]):
+        for j in range(0,x[0]):
+            arr1[i][j]=mat[j][i]
+    return arr1
+
+def mean(y):
+    arr=np.zeros(len(y[0]),float)
+    for j in range(len(y[0])):
+        add=0
+        for i in range(0,len(y)):
+            add=add+y[i][j]
+        arr[j]=add/len(y)
+    return arr
+alpha=float(input("enter the value of alpha"))
+y=eval(input("enter dependent variable values"))
+x=eval(input("enter independent variable values"))
+x_trans=transpose(x)
+x_tx=matmul(x_trans,x)
+inverse=np.linalg.inv(x_tx)
+x_ty=matmul(x_trans,y)
+beta=matmul(inverse,x_ty)
+print(beta)
+fitted=np.zeros((len(y),len(y[0])),float)
+error=np.zeros((len(y),len(y[0])),float)
+t=np.zeros((len(y),len(y[0])),float)
+y1=np.zeros((len(y)),float)
+m=mean(y)
+for j in range(0,len(y[0])):
+    for i in range(0,len(y)):
+        fitted[i][j]=beta[0][j]+(beta[1][j]*x[i][1])+(beta[2][j]*x[i][2])+(beta[3][j]*x[i][3])
+        error[i][j]=(y[i][j]-fitted[i][j])**2
+        t[i][j]=(y[i][j]-m[j])**2
+ESS=sum(error)
+print(ESS)
+TSS=sum(t)
+RSS=TSS-ESS
+R2=RSS/TSS
+print(R2)
+for i in range(len(y[0])):
+    if(R2[i]>0.90):
+        print("The model is fit")
+    else:
+        print("The model isnot fit")
+p=len(x[0])-1
+n=len(x)-len(x[0])
+ftab=scipy.stats.f.ppf(1-alpha,len(x[0])-1,len(x)-len(x[0]))
+for i in range(len(y[0])):
+    data=[["Regression",p,RSS[i],RSS[i]/p,(RSS[i]/p)/(ESS[i]/n),ftab],["Error",n,ESS[i],ESS[i]/n," "," "],["Total",len(x)-1,TSS[i]," "," "," "]]
+    print(pd.DataFrame(data,columns=["Source of variation","Degree of freedom","Sum of squares","Mean sum of squares","Fcal","Ftab"]))
+    if(((RSS[i]/p)/(ESS[i]/n))<=ftab):
+        print("good fit")
+    else:
+        print("not a good fit")
+SE=np.zeros((len(beta),len(beta[0])),float)
+t=np.zeros((len(beta),len(beta[0])),float)
+for i in range(len(beta)):
+    for j in range(len(beta[0])):
+        SE[i][j]=((ESS[j]/n)*inverse[i][i])**0.5
+        t[i][j]=beta[i][j]/SE[i][j]
+ttab=scipy.stats.t.ppf(q=1-alpha/2,df=len(x)-len(x[0]))
+print(ttab)
+for i in range(len(beta[0])):
+    data2=[["constant",beta[0][i],SE[0][i],t[0][i]],["beta1",beta[1][i],SE[1][i],t[1][i]],["beta2",beta[2][i],SE[2][i],t[2][i]],["beta3",beta[3][i],SE[3][i],t[3][i]]]
+    print(pd.DataFrame(data2,columns=["Predicator","Coefficient","SE","t"]))
+for j in range(len(beta[0])):
+    for i in range(len(beta)):
+        if(t[i][j]>ttab):
+            print("beta",i,j,"is contributing")
+        else:
+            print("beta",i,j,"isnot contributing")
+--------------------------------------------------------------------------------------------------------
+9)
+
+import numpy as np
+import pandas as pd
+import scipy.stats
+
+def deter(mat):
+    det=(mat[0][0]*mat[1][1])-(mat[0][1]*mat[1][0])
+    return det
+
+tr=int(input("enter no of treatments"))
+alpha=float(input("enter the value of level of significance"))
+l=[]
+y=[]
+for i in range(0,tr):
+    t=eval(input("enter the treatment"))
+    l.append(t)
+y=np.zeros((len(l),len(l[0][0])),float)
+for i in range(len(l)):
+    for j in range(len(l[i][i])):
+        add=0
+        for k in range(len(l[i])):
+            add=add+l[i][k][j][0]
+        y[i][j]=add/len(l[i])
+yy=np.zeros((len(l[0][0])),float)
+for i in range(len(l[0][0])):
+    add=0
+    c=0
+    for j in range(len(l)):
+        for k in range(len(l[j])):
+            add=add+l[j][k][i][0]
+            c=c+1
+    yy[i]=add/c
+sse=[]
+sst=[]
+ssr=[]
+for k in range(tr-1):
+    add=0
+    add1=0
+    for i in range(len(l)):
+        for j in range(len(l[i])):
+            add=add+(l[i][j][k]-y[i][k])**2
+            add1=add1+(l[i][j][k]-yy[k])**2
+    sse.append(add)
+    sst.append(add1)
+for i in range(len(sse)):
+    ssr.append(sst[i]-sse[i])
+c_sse=0
+c_sst=0
+for i in range(len(l)):
+    for j in range(len(l[i])):
+        c_sse=c_sse+(l[i][j][0][0]*l[i][j][1][0])-(y[i][0]*y[i][1])
+        c_sst=c_sst+(l[i][j][0][0]*l[i][j][1][0])-(yy[0]*yy[1])
+c_ssr=c_sst-c_sse
+B=[[ssr[0],c_ssr],[c_ssr,ssr[1]]]
+W=[[sse[0],c_sse],[c_sse,sse[1]]]
+T=[[sst[0],c_sst],[c_sst,sst[1]]]
+lam=deter(W)/deter(T)
+fcal=((c-tr-1)*(1-(lam**0.5)))/((tr-1)*(lam**0.5))
+ftab=scipy.stats.f.ppf(1-alpha,len(l[0][0])*(tr-1),len(l[0][0])*(c-tr-1))
+data=[["Regression",B,tr-1,lam,fcal],["Error",W,c-tr," "," "],["Total",T,c-1," "," "]]
+print(pd.DataFrame(data,columns=["Source of variation","Sum of Squares","Degree of freedom","Wilk's value","F-test"]))
+print(ftab)
+if(fcal<=ftab):
+    print("we accept")
+else:
+    print("we reject")
+
+[[[9],[3]],[[6],[2]],[[9],[7]]]
+[[[0],[4]],[[2],[0]]]
+[[[3],[8]],[[1],[9]],[[2],[7]]]
+
+--------------------------------------------------------------------------------------------------------
+10)
+
+import numpy as np
+import pandas as pd
+
+def matmul(arr1,arr2):
+    x=np.shape(arr1)
+    y=np.shape(arr2)
+    if(x[1]==y[0]):
+        arr3=np.zeros((x[0],y[1]),float)
+        for i in range(0,x[0]):
+            for j in range(0,y[1]):
+                for k in range(0,y[0]):
+                    arr3[i][j]=arr3[i][j]+arr1[i][k]*arr2[k][j]
+    return(arr3)
+
+def transpose(mat):
+    x=np.shape(mat)
+    arr1=np.zeros((x[1],x[0]),float)
+    for i in range(0,x[1]):
+        for j in range(0,x[0]):
+            arr1[i][j]=mat[j][i]
+    return arr1
+
+
+def mean(y):
+    arr=np.zeros((1,len(y[0])),float)
+    for j in range(len(y[0])):
+        add=0
+        for i in range(0,len(y)):
+            add=add+y[i][j]
+        arr[0][j]=add/len(y)
+    return(arr)
+
+x=eval(input("Enter independent variable values"))
+y=eval(input("Enter dependent variable values"))
+k=eval(input("Enter the independent variables"))
+xk=eval(input("Enter the xk variables"))
+x1=[]
+x2=[]
+for i in range(0,len(x)):
+    if(y[i][0]==k[0]):
+        x1.append(x[i])
+    if(y[i][0]==k[1]):
+        x2.append(x[i])
+mu=mean(x)
+mu1=[]
+mu1.append(mean(x1))
+mu1.append(mean(x2))
+c=(matmul(transpose(x-mu),(x-mu)))/len(x)
+print(c)
+c_inv=np.linalg.inv(c)
+p=[]
+p.append(len(x1)/len(x))
+p.append(len(x2)/len(x))
+f=[]
+for i in range(len(c)):
+    muc_in=matmul(mu1[i],c_inv)
+    muxk=matmul(muc_in,transpose(xk))
+    mu_mut=matmul(muc_in,transpose(mu1[i]))
+    f1=muxk-(0.5*mu_mut)+np.log(p[i])
+    f.append(f1)
+print(f)
+if(f[0]<f[1]):
+    print(k[0])
+else:
+    print(k[1])
+--------------------------------------------------------------------------------------------------------
+11)
+
+
+import numpy as np
+import pandas as pd
+
+def matmul(arr1,arr2):
+    x=np.shape(arr1)
+    y=np.shape(arr2)
+    if(x[1]==y[0]):
+        arr3=np.zeros((x[0],y[1]),float)
+        for i in range(0,x[0]):
+            for j in range(0,y[1]):
+                for k in range(0,y[0]):
+                    arr3[i][j]=arr3[i][j]+arr1[i][k]*arr2[k][j]
+    return(arr3)
+
+def transpose(mat):
+    x=np.shape(mat)
+    arr1=np.zeros((x[1],x[0]),float)
+    for i in range(0,x[1]):
+        for j in range(0,x[0]):
+            arr1[i][j]=mat[j][i]
+    return arr1
+
+
+def mean(y):
+    arr=np.zeros((1,len(y[0])),float)
+    for j in range(len(y[0])):
+        add=0
+        for i in range(0,len(y)):
+            add=add+y[i][j]
+        arr[0][j]=add/len(y)
+    return(arr)
+
+x=eval(input("Enter the observations"))
+mu=mean(x)
+xmu=x-mu
+xmut=transpose(xmu)
+c=(matmul(xmut,xmu))/len(x)
+l=[]
+l1=[]
+if(len(c)==2):
+    a=1
+    b=-1*(c[0][0]+c[1][1])
+    c1=((c[0][0]*c[1][1])-(c[1][0]*c[0][1]))
+    x=[]
+    x.append(((-1*b)+((b**2)-(4*a*c1))**0.5)/2*a)
+    x.append(((-1*b)-((b**2)-(4*a*c1))**0.5)/2*a)
+    data=[["z1",x[0],x[0]/(sum(x)*100)],["z2",x[1],100]]
+    print(pd.DataFrame(data,columns=["Principal component","variance explained","Cummulative proportion of total variance"]))
+    for i in range(0,len(x)):
+        if((c[0][0]-x[i])<0):
+            l.append((-1*(c[0][0]-x[i]))/(((c[0][0]-x[i])**2)+(c[0][1]**2))**0.5)
+            l.append((c[0][1])/(((c[0][0]-x[i])**2)+(c[0][1]**2))**0.5)
+        else:
+            l.append((c[0][0]-x[i])/(((c[0][0]-x[i])**2)+(c[0][1]**2))**0.5)
+            l.append((-1*(c[0][1]))/(((c[0][0]-x[i])**2)+(c[0][1]**2))**0.5)
+    print("z1=",l[1],"x1+",l[0],"x2")
+    print("z2=",l[3],"x1+",l[2],"x2")
+else:
+    c1=np.linalg.inv(c)*np.linalg.det(c)
+    p=[1,-1*(c[0][0]+c[1][1]+c[2][2]),c1[0][0]+c1[1][1]+c1[2][2],-1*np.linalg.det(c)]
+    p1=np.roots(p)
+    data=[["z1",p1[0],(p1[0]/sum(p1))*100],["z2",p1[1],((p1[0]+p1[1])/sum(p1))*100],["z3",p1[2],100]]
+    print(pd.DataFrame(data,columns=["Principal component","variance explained","Cummulative proportion of total variance"]))
+    for i in range(0,2):
+        eg1=(c[1][0]*c[2][1])-(c[2][0]*(c[1][1]-p1[i]))
+        eg2=(c[0][2]*c[1][0])-(c[1][2]*(c[0][0]-p1[i]))
+        eg3=((c[0][0]-p1[i])*(c[1][1]-p1[i]))-(c[1][0]*c[0][1])
+        l.append(eg1)
+        l.append(eg2)
+        l.append(eg3)
+    for i in range(0,len(l)//2):
+        add=0
+        for j in range(0,len(l)//2):
+            add=add+l[j]**2
+        l1.append(l[i]/add**0.5)
+    for i in range(len(l)//2,len(l)):
+        add=0
+        for j in range(len(l)//2,len(l)):
+            add=add+l[j]**2
+        l1.append(l[i]/add**0.5)
+    print("z1=",l1[0],"x1+",l1[1],"x2+",l1[2],"x3")
+    print("z2=",l1[3],"x1+",l1[4],"x2+",l1[5],"x3")
+
+Output:
+
+Enter the observations[[90,60,90],[90,90,30],[60,60,60],[60,60,90],[30,30,30]]
+  Principal component  variance explained  \
+0                  z1          910.069953   
+1                  z2          629.110387   
+2                  z3           44.819660   
+
+   Cummulative proportion of total variance  
+0                                 57.453911  
+1                                 97.170476  
+2                                100.000000  
+z1= 0.6558022549801406 x1+ 0.42919779654868107 x2+ 0.6210576895914901 x3
+z2= 0.38599879538809223 x1+ 0.5163664177215497 x2+ -0.7644413990675517 x3
+
+--------------------------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------------------------
+
+
+
+
+Power Curve:
+
+
+import numpy as np
+import matplotlib.pyplot as plt
+
+x=np.array(eval(input("enter sample1")))
+y=np.array(eval(input("enter sample2")))
+n=len(x)
+b=((n*sum(x*y))-(sum(x)*sum(y)))/((n*sum(x*x))-(sum(x)**2))
+a=(sum(y)-(b*sum(x)))/n
+print("y=",a,"+",b,"x")
+y1=a+b*x
+print(y1)
+plt.plot(x,y1)
+plt.title("straight line")
+plt.scatter(x,y1,c="red")
+plt.show()
